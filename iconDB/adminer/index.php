@@ -51,8 +51,8 @@ if ($edit != '') {
   $query=dbquery("SELECT id,name,city,country,region FROM team WHERE id='$edit'");
 }elseif ($del != '') {
   $query=dbquery("SELECT name FROM team WHERE id=$del");
-  $name=mysql_result($query,0);
-  if (dbresult($name) != '') {
+  $name=dbresult($query,0);
+  if ($name != '') {
   	unlink("../".GET_TeamIcon($name));
   }
   $result=dbquery("DELETE FROM team WHERE id=$del");
