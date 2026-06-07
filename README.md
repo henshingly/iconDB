@@ -1,6 +1,6 @@
 # iconDB
 
-Ein Datenbank für Mannschaftswappen. 
+Eine Datenbank für Mannschaftswappen. 
 
 ### Systemvoraussetzungen
 - PHP 8.x
