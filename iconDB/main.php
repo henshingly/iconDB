@@ -4,13 +4,13 @@ if (empty($_SESSION['ok'])) {
     header('Location: ' . $_SERVER['HTTP_HOST'] . '/index.php');
     exit;
 }
-$initial = array();
-$teams = array();
+$initial = [];
+$teams = [];
 $count = 0;
-require_once ('cfg.php');
-require_once ('db_connect.php');
+require_once('cfg.php');
+require_once('db_connect.php');
 
-$ini = !empty($_GET['i']) ? $_GET['i'] : '';
+$ini  = !empty($_GET['i'])     ? $_GET['i']     : '';
 $term = !empty($_POST['term']) ? $_POST['term'] : '';
 $term2 = $term;
 
@@ -22,18 +22,27 @@ $term = str_replace('?', '_', $term);
 
 $query = dbquery('SELECT id FROM team');
 $count = dbrows($query);
-$query = dbquery('SELECT DISTINCT LEFT (city, 1) AS anfangsbuchstabe FROM team ORDER BY anfangsbuchstabe');
+
+$query = dbquery('SELECT DISTINCT LEFT(city, 1) AS anfangsbuchstabe FROM team ORDER BY anfangsbuchstabe');
 while ($i = dbarraynum($query)) {
-    if ($ini == '' && $term == '') {
+    if ($ini === '' && $term === '') {
         $ini = $i[0];
     }
     $initial[] = $i[0];
 }
-if ($term == '') {
-    $query = dbquery("SELECT id,name,city,country,region FROM team WHERE city LIKE '$ini%' ORDER BY name");
+
+if ($term === '') {
+    $query = dbquery(
+        "SELECT id, name, city, country, region, icon FROM team WHERE city LIKE ? ORDER BY name",
+        [$ini . '%']
+    );
 } else {
-    $query = dbquery("SELECT id,name,city,country,region FROM team WHERE name LIKE '$term' OR city LIKE '$term' ORDER BY name LIMIT " . MAXIMUM_SEARCH_RESULTS);
+    $query = dbquery(
+        "SELECT id, name, city, country, region, icon FROM team WHERE name LIKE ? OR city LIKE ? ORDER BY name LIMIT " . (int) MAXIMUM_SEARCH_RESULTS,
+        [$term, $term]
+    );
 }
+
 while ($i = dbarray($query)) {
     $teams[] = $i;
 }
@@ -55,8 +64,8 @@ while ($i = dbarray($query)) {
     <ul class='pagination'>
     <?php
         foreach ($initial as $i) {
-            if ($ini != $i) {
-                echo "      <li class='page-item'><a class='page-link' href='" . $_SERVER['PHP_SELF'] . "?i=$i'>$i</a></li>\n";
+            if ($ini !== $i) {
+                echo "      <li class='page-item'><a class='page-link' href='" . htmlspecialchars($_SERVER['PHP_SELF']) . "?i=$i'>$i</a></li>\n";
             } else {
                 $current_initial = $i;
                 echo "  <li class='page-item active'><a class='page-link'>$i</a></li>\n";
@@ -67,7 +76,7 @@ while ($i = dbarray($query)) {
     <p><small>[<?php echo "$count " . TEAM_IN_DB ?>]</small></p>
     <hr>
     <div id="search">
-      <form action="<?php echo $_SERVER['PHP_SELF']; ?>" method="post" class="form-inline" role="form">
+      <form action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>" method="post" class="form-inline" role="form">
         <div class="row g-3">
           <div class="col-auto">
             <h3><?php echo SEARCH ?></h3>
@@ -88,8 +97,8 @@ while ($i = dbarray($query)) {
       <p><hr></p>
       <h3><?php
 $search_results = dbrows($query);
-echo $search_results . TEAMS_FOUND . ' "' . $term2 . $ini . '" ' . FOUND;
-if ($term != '' && $search_results >= MAXIMUM_SEARCH_RESULTS) {
+echo $search_results . TEAMS_FOUND . ' "' . htmlspecialchars($term2 . $ini) . '" ' . FOUND;
+if ($term !== '' && $search_results >= MAXIMUM_SEARCH_RESULTS) {
     echo ' <small>(' . SEARCH_LIMIT . MAXIMUM_SEARCH_RESULTS . RESULTS . ')';
 }
 ?></h3>
@@ -100,26 +109,26 @@ if ($term != '' && $search_results >= MAXIMUM_SEARCH_RESULTS) {
         <div class="col-4"><p class="font-weight-bold text-uppercase"><?php echo TEAM; ?> <small>(<?php echo CITY; ?>)</small></p></div>
         <div class="col-3"><p class="font-weight-bold text-uppercase"><?php echo COUNTRY; ?></p></div>
         <div class="col-2"><p class="font-weight-bold text-uppercase"><?php echo ZIP_IT; ?></p></div>
-        <div class="col-1"></div> 
+        <div class="col-1"></div>
       </div>
       <?php
 if (!empty($teams)) {
     $anz = count($teams);
-    $cluster = array();
-    $zipcluster = array();
+    $cluster = [];
+    $zipcluster = [];
     for ($i = 0; $i < $anz; $i++) {
         $j = $teams[$i];
         $cluster[] = $teams[$i]['id'];
         if (fmod($i + 1, MAXIMUM_ICONS_PER_ZIP) == 0) {
             $zipcluster[] = $cluster;
-            $cluster = array();
+            $cluster = [];
         }
 ?>
       <div class="row p-2">
-        <div class="col-1"><?php echo HTML_TeamIcon($j['name'], " title='" . $j['name'] . "'", " alt='" . $j['name'] . "'"); ?></div>
-        <div class="col-4"><strong><?php echo $j['name'] ?></strong> <small>(<?php echo $j['city'] ?>)</small></div>
-        <div class="col-3"><?php echo $j['country'] ?></div>
-        <div class="col-2"><a target="result" href="result.php?add=<?php echo $j['id'] ?>" title="<?php echo SELECT; ?>"><i class="bi bi-download" style="font-size: 1.3rem"></i></a></div>
+        <div class="col-1"><?php echo HTML_TeamIcon($j['icon'] ?? '', " title='" . htmlspecialchars($j['name']) . "'", " alt='" . htmlspecialchars($j['name']) . "'"); ?></div>
+        <div class="col-4"><strong><?php echo htmlspecialchars($j['name']) ?></strong> <small>(<?php echo htmlspecialchars($j['city']) ?>)</small></div>
+        <div class="col-3"><?php echo htmlspecialchars($j['country']) ?></div>
+        <div class="col-2"><a target="result" href="result.php?add=<?php echo (int) $j['id'] ?>" title="<?php echo SELECT; ?>"><i class="bi bi-download" style="font-size: 1.3rem"></i></a></div>
       </div>
       <?php
     }
@@ -136,12 +145,12 @@ if (!empty($teams)) {
 if (!empty($teams)) {
     if (count($zipcluster) == 1) {
 ?>
-<a target="result" href="result.php?add=<?php echo implode(',', $zipcluster[0]); ?>" title="<?php echo SELECTALL; ?>"><i class="bi bi-download text-success" style="font-size: 1.3rem"></i></a>
+<a target="result" href="result.php?add=<?php echo implode(',', array_map('intval', $zipcluster[0])); ?>" title="<?php echo SELECTALL; ?>"><i class="bi bi-download text-success" style="font-size: 1.3rem"></i></a>
 <?php
     } else {
         foreach ($zipcluster as $cluster) {
 ?>
-<a target="result" href="result.php?add=<?php echo implode(',', $cluster); ?>"><i class="bi bi-download text-success"  style="font-size: 1.3rem" title="<?php echo SELECTALL; ?>"></i></a>
+<a target="result" href="result.php?add=<?php echo implode(',', array_map('intval', $cluster)); ?>"><i class="bi bi-download text-success"  style="font-size: 1.3rem" title="<?php echo SELECTALL; ?>"></i></a>
 <?php
         }
     }
@@ -153,8 +162,8 @@ if (!empty($teams)) {
     <ul class="pagination">
     <?php
         foreach ($initial as $i) {
-            if ($ini != $i) {
-                echo "      <li class='page-item'><a class='page-link' href='" . $_SERVER['PHP_SELF'] . "?i=$i'>$i</a></li>\n";
+            if ($ini !== $i) {
+                echo "      <li class='page-item'><a class='page-link' href='" . htmlspecialchars($_SERVER['PHP_SELF']) . "?i=$i'>$i</a></li>\n";
             } else {
                 $current_initial = $i;
                 echo "  <li class='page-item active'><a class='page-link'>$i</a></li>\n";
