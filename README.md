@@ -1,20 +1,25 @@
 # iconDB
 
-Ein  Datenbank für Mannschaftswappen. 
+Ein Datenbank für Mannschaftswappen. 
 
 ### Systemvoraussetzungen
 - PHP 8.x
 - MySQL
 
 ### Installation
-Beim Erstaufruf erfolgt ein automatisierter Aufruf der Installation. Anzugeben sind hier die Credentials für die Datenbank als auch die zu nutzenden Grafiktypen.
+Beim Erstaufruf erfolgt ein automatisierter Aufruf der Installation. Anzugeben sind:
+- **Datenbank-Credentials**: Host, Benutzer, Passwort, Datenbankname
+- **Admin-Anmeldedaten**: Benutzername und Passwort für den geschützten Administrationsbereich
+
+Die Installation erzeugt automatisch die notwendigen `.htaccess` und `.htpasswd` Dateien für den Verzeichnisschutz des Admin-Bereichs.
 
 ### Administration
-Die Administration kann über `/adminer/` aufgerufen werden, es gibt kein Passwort für den Administrationsbereich. Ggf. das Verzeichnis umbenennen.
+Die Administration kann über `/adminer/` aufgerufen werden. Der Administrationsbereich ist durch HTTP Basic Authentication geschützt. Die Anmeldedaten werden während der Installation festgelegt.
 
 ### Massenimport bestehender Wappen
 Mittels `/import/dir2base.php` können im Verzeichnis `/icons/` bereits vorab abgelegte Wappen in die Datenbank importiert werden.
 
+---
 
 # iconDB
 
@@ -25,10 +30,14 @@ A database for team logos
 - MySQL
 
 ### Installation
-On the first call the iinstallation starts automatically. You have to enter the credentials of the database as well as the image types to use.
+On the first call the installation starts automatically. You have to enter:
+- **Database credentials**: Host, user, password, database name
+- **Admin credentials**: Username and password for the protected admin area
+
+The installation automatically creates the necessary `.htaccess` and `.htpasswd` files for directory protection of the admin area.
 
 ### Administration
-The administration ist accessable through `/adminer/`, no password needed. Might change the directory name.
+The administration is accessible through `/adminer/`. The admin area is protected by HTTP Basic Authentication. The login credentials are set during installation.
 
-### Massemport existing logos
+### Mass import existing logos
 By using `/import/dir2base.php` the images in the directory `/icons/` are inserted into the database.
