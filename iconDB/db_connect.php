@@ -3,7 +3,7 @@
 $pdo = NULL;
 
 // MySQL database functions
-function dbquery($query)
+function dbquery($query, $params = [])
 {
     global $pdo;
     $result = $pdo->prepare($query);
@@ -11,7 +11,7 @@ function dbquery($query)
         print_r($result->errorInfo());
         return false;
     } else {
-        $result->execute();
+        $result->execute($params);
         return $result;
     }
 }
@@ -74,8 +74,8 @@ function dbconnect($db_host, $db_user, $db_pass, $db_name)
     global $pdo;
     try {
         $pdo = new PDO('mysql:host=' . $db_host . ';dbname=' . $db_name . ';encoding=utf8', $db_user, $db_pass);
-    } catch (PDOException $error) {
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    } catch (PDOException $error) {
         die('<strong>Unable to select MySQL database</strong><br />' . $error->getMessage());
     }
 }
